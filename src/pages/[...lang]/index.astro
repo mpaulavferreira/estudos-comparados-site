@@ -1,0 +1,86 @@
+---
+import Base from '../../layouts/Base.astro';
+import Mapa from '../../components/Mapa.astro';
+import Atalhos from '../../components/Atalhos.astro';
+import Numeros from '../../components/Numeros.astro';
+import { caminhosIdiomas, t, rota, type Idioma } from '../../i18n/ui';
+import { noIdioma } from '../../lib/conteudo';
+
+export const getStaticPaths = caminhosIdiomas;
+const { lang } = Astro.props as { lang: Idioma };
+const novidades = (await noIdioma('novidades', lang)).sort((a, b) => +b.entrada.data.data - +a.entrada.data.data).slice(0, 3);
+
+// Os 4 passos da pesquisa, em linguagem do dia a dia (texto em pt; traduzir junto com o resto).
+const passos = [
+  { cor: 'var(--seta-vermelha)', titulo: 'Fizemos as mesmas perguntas', texto: 'Um questionário igual para todos, adaptado ao jeito de falar de cada país.' },
+  { cor: 'var(--seta-petroleo)', titulo: 'Fomos até o postinho', texto: 'Pesquisadoras e pesquisadores viajaram para conversar com quem atende a população.' },
+  { cor: 'var(--seta-verde)', titulo: 'Ouvimos com cuidado', texto: 'Ninguém é identificado. O que importa é o que se repete e o que muda entre lugares.' },
+  { cor: 'var(--seta-pessego)', titulo: 'Devolvemos o que aprendemos', texto: 'Artigos, livro de relatos, cartilha e este site, para quem cuida e para quem é cuidado.' },
+];
+---
+<Base lang={lang} caminho="/">
+  <section class="abertura">
+    <div class="envelope abertura-grade">
+      <div class="chamada">
+        <p class="rotulo">{t(lang, 'site.lema')}</p>
+        <h1>{t(lang, 'home.titulo')}</h1>
+        <p class="sub">{t(lang, 'home.sub')}</p>
+        <button class="pilula grande" type="button" data-abrir-busca>✈︎ {t(lang, 'busca.abrir')}</button>
+      </div>
+      <div class="palco" transition:name="mapa"><Mapa lang={lang} /></div>
+    </div>
+    <div class="envelope"><Atalhos lang={lang} /></div>
+  </section>
+
+  <section class="secao"><div class="envelope"><Numeros lang={lang} /></div></section>
+
+  <section class="secao passos-secao">
+    <div class="envelope">
+      <h2 class="revelar">{t(lang, 'home.comoFizemos')}</h2>
+      <ol class="passos">
+        {passos.map((p, i) => (
+          <li class="revelar" style={`--cor:${p.cor}; transition-delay:${i * 120}ms`}>
+            <span class="num">{i + 1}</span>
+            <h3>{p.titulo}</h3>
+            <p>{p.texto}</p>
+          </li>
+        ))}
+      </ol>
+      <p><a href={rota(lang, '/pesquisa')}>{t(lang, 'saibaMais')} →</a></p>
+    </div>
+  </section>
+
+  {novidades.length > 0 && (
+    <section class="secao">
+      <div class="envelope">
+        <h2>{t(lang, 'home.ultimas')}</h2>
+        <div class="grade-novidades">
+          {novidades.map(({ entrada, slug }) => (
+            <a class="cartao revelar" href={rota(lang, `/novidades/${slug}`)}>
+              <time datetime={entrada.data.data.toISOString()}>{entrada.data.data.toLocaleDateString(lang, { dateStyle: 'long' })}</time>
+              <h3>{entrada.data.titulo}</h3>
+              <p>{entrada.data.resumo}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .abertura { padding-block: clamp(24px, 5vw, 56px) 24px; background: radial-gradient(1200px 500px at 70% 30%, var(--globo-claro), transparent 70%); }
+  .abertura-grade { display: grid; grid-template-columns: minmax(280px, .8fr) 1.6fr; gap: clamp(16px, 4vw, 48px); align-items: center; }
+  .sub { font-size: 1.2rem; color: var(--texto-suave); max-width: 38ch; }
+  .grande { padding: 14px 22px; font-size: 1.05rem; background: var(--tinta); color: #fff; border: 0; cursor: pointer; font-family: inherit; }
+  .grande:hover { color: #fff; }
+  .passos { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; counter-reset: p; }
+  .passos li { background: #fff; border-radius: var(--raio); padding: 24px; border-top: 6px solid var(--cor); box-shadow: var(--sombra); }
+  .passos .num { font-family: var(--fonte-titulo); font-size: 3rem; color: var(--cor); line-height: 1; font-weight: 800; }
+  .passos h3 { font-size: 1.25rem; margin: 8px 0; }
+  .grade-novidades { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .grade-novidades a { text-decoration: none; color: inherit; }
+  time { color: var(--texto-suave); font-size: .9rem; }
+  @media (max-width: 900px) { .abertura-grade { grid-template-columns: 1fr; } .palco { order: -1; } .chamada .grande { display: none; } .passos { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .passos { grid-template-columns: 1fr; } }
+</style>

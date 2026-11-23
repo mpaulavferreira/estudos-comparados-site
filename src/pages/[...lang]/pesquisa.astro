@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import Termo from '../../components/Termo.astro';
+import { caminhosIdiomas, t, type Idioma } from '../../i18n/ui';
+export const getStaticPaths = caminhosIdiomas;
+const { lang } = Astro.props as { lang: Idioma };
+---
+<Base lang={lang} titulo={t(lang, 'nav.pesquisa')} caminho="/pesquisa">
+  <section class="secao"><div class="envelope texto">
+    <h1>{t(lang, 'nav.pesquisa')}</h1>
+    <p class="grande">
+      Quando alguém chega ao <Termo def="Atenção Primária à Saúde (APS): o primeiro nível de cuidado, mais perto de onde as pessoas vivem.">postinho perto de casa</Termo>
+      com uma dúvida que viu no grupo da família, onde a enfermeira, o médico e a agente comunitária vão buscar a resposta?
+    </p>
+    <p>Foi isso que perguntamos, do Peru a Moçambique, em português e espanhol. A ideia é simples: onde falta boa informação, a <Termo def="Desinformação em saúde: conteúdo falso ou enganoso sobre saúde que circula como se fosse verdade.">desinformação</Termo> ocupa o espaço.</p>
+    <!-- Texto de exemplo para mostrar o tom. A equipe substitui pelo texto oficial pelo painel. -->
+  </div></section>
+</Base>
+<style>.texto { max-width: 760px; } .grande { font-size: 1.35rem; }</style>

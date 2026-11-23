@@ -1,0 +1,57 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { caminhosIdiomas, t, type Idioma } from '../../i18n/ui';
+import { PAISES } from '../../data/paises';
+
+export const getStaticPaths = caminhosIdiomas;
+const { lang } = Astro.props as { lang: Idioma };
+const itens = (await getCollection('biblioteca')).sort((a, b) => b.data.ano - a.data.ano);
+const tipos = [...new Set(itens.map((i) => i.data.tipo))];
+const fases = [...new Set(itens.map((i) => i.data.fase).filter(Boolean))];
+const nomePais = (s: string) => PAISES.find((p) => p.slug === s)?.nome[lang] ?? s;
+---
+<Base lang={lang} titulo={t(lang, 'nav.biblioteca')} caminho="/biblioteca">
+  <section class="secao"><div class="envelope">
+    <h1>{t(lang, 'nav.biblioteca')}</h1>
+    <!-- Filtros sem recarregar a página: um clique e a lista muda. -->
+    <div class="filtros" role="group" aria-label={t(lang, 'biblioteca.filtrar')}>
+      <button type="button" class="pilula ativo" data-filtro="">{t(lang, 'biblioteca.todos')}</button>
+      {tipos.map((tp) => <button type="button" class="pilula" data-filtro={`tipo:${tp}`}>{tp}</button>)}
+      {fases.map((f) => <button type="button" class="pilula" data-filtro={`fase:${f}`}>Fase {f}</button>)}
+      {PAISES.map((p) => itens.some((i) => i.data.paises.includes(p.slug as any)) && <button type="button" class="pilula" style={`--cor:${p.cor}`} data-filtro={`pais:${p.slug}`}><span class="ponto"></span>{p.nome[lang]}</button>)}
+    </div>
+    <ul class="lista">
+      {itens.map((i) => (
+        <li data-tags={[`tipo:${i.data.tipo}`, i.data.fase && `fase:${i.data.fase}`, ...i.data.paises.map((p) => `pais:${p}`)].filter(Boolean).join(' ')}>
+          <a href={i.data.link ?? i.data.arquivo} class="item">
+            <span class="rotulo">{i.data.tipo} · {i.data.ano}{i.data.fase && ` · Fase ${i.data.fase}`} · {i.data.idiomas.join('/').toUpperCase()}</span>
+            <strong>{i.data.titulo}</strong>
+            {i.data.autoria && <span class="autoria">{i.data.autoria}</span>}
+            {i.data.paises.length > 0 && <span class="autoria">{i.data.paises.map(nomePais).join(', ')}</span>}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div></section>
+</Base>
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const botoes = [...document.querySelectorAll<HTMLButtonElement>('[data-filtro]')];
+    const itens = [...document.querySelectorAll<HTMLLIElement>('.lista li')];
+    botoes.forEach((b) => b.addEventListener('click', () => {
+      botoes.forEach((x) => x.classList.toggle('ativo', x === b));
+      const f = b.dataset.filtro!;
+      itens.forEach((li) => { li.hidden = !!f && !li.dataset.tags!.split(' ').includes(f); });
+    }));
+  });
+</script>
+<style>
+  .filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .filtros button { cursor: pointer; font: inherit; font-weight: 700; }
+  .filtros .ativo { background: var(--tinta); color: #fff; }
+  .lista { list-style: none; padding: 0; display: grid; gap: 12px; }
+  .item { display: grid; gap: 4px; background: #fff; border-radius: 14px; padding: 18px 22px; text-decoration: none; color: inherit; box-shadow: var(--sombra); }
+  .item:hover strong { color: var(--seta-vermelha); }
+  .autoria { color: var(--texto-suave); font-size: .95rem; }
+</style>

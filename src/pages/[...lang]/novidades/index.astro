@@ -1,0 +1,31 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { caminhosIdiomas, t, rota, type Idioma } from '../../../i18n/ui';
+import { noIdioma } from '../../../lib/conteudo';
+export const getStaticPaths = caminhosIdiomas;
+const { lang } = Astro.props as { lang: Idioma };
+const itens = (await noIdioma('novidades', lang)).sort((a, b) => +b.entrada.data.data - +a.entrada.data.data);
+const titulo = t(lang, 'nav.novidades');
+---
+<Base lang={lang} titulo={titulo} caminho="/novidades">
+  <section class="secao"><div class="envelope">
+    <h1>{titulo}</h1>
+    <div class="mural">
+      {itens.map(({ entrada, slug }) => (
+        <a class="cartao revelar" href={rota(lang, `/novidades/${slug}`)}>
+          {entrada.data.capa && <img src={entrada.data.capa.src} alt={entrada.data.capa.alt} loading="lazy" />}
+          <time datetime={entrada.data.data.toISOString()}>{entrada.data.data.toLocaleDateString(lang, { dateStyle: 'long' })}</time>
+          <h2>{entrada.data.titulo}</h2>
+          <p>{entrada.data.resumo}</p>
+        </a>
+      ))}
+    </div>
+  </div></section>
+</Base>
+<style>
+  .mural { columns: 3 300px; column-gap: 20px; }
+  .mural a { display: block; break-inside: avoid; margin-bottom: 20px; text-decoration: none; color: inherit; }
+  .mural img { border-radius: 12px; margin-bottom: 12px; }
+  .mural h2 { font-size: 1.4rem; margin: 6px 0; }
+  time { color: var(--texto-suave); font-size: .9rem; }
+</style>

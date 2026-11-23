@@ -1,0 +1,25 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { render } from 'astro:content';
+import { IDIOMAS, PADRAO, t, type Idioma } from '../../../i18n/ui';
+import { noIdioma } from '../../../lib/conteudo';
+
+export async function getStaticPaths() {
+  const out = [];
+  for (const l of IDIOMAS) for (const it of await noIdioma('novidades', l)) out.push({ params: { lang: l === PADRAO ? undefined : l, slug: it.slug }, props: { lang: l, it } });
+  return out;
+}
+const { lang, it } = Astro.props as { lang: Idioma; it: Awaited<ReturnType<typeof noIdioma<'novidades'>>>[number] };
+const { Content } = await render(it.entrada);
+const d = it.entrada.data;
+---
+<Base lang={lang} titulo={d.titulo} descricao={d.resumo} caminho={`/novidades/${it.slug}`}>
+  <article class="secao"><div class="envelope texto">
+    <time datetime={d.data.toISOString()}>{d.data.toLocaleDateString(lang, { dateStyle: 'long' })}</time>
+    <h1>{d.titulo}</h1>
+    {!it.traduzido && <p class="aviso">{t(lang, 'traducao.aviso')}</p>}
+    {d.capa && <figure><img src={d.capa.src} alt={d.capa.alt} />{d.capa.legenda && <figcaption>{d.capa.legenda}</figcaption>}</figure>}
+    <Content />
+  </div></article>
+</Base>
+<style>.texto { max-width: 720px; font-size: 1.12rem; } .aviso { background: #fff7e0; padding: 10px 14px; border-radius: 8px; } figure { margin: 24px 0; } figcaption { color: var(--texto-suave); font-size: .95rem; }</style>

@@ -1,0 +1,143 @@
+---
+// Página de país = uma "parada" da viagem. Mesmo modelo para os 13.
+import Base from '../../../layouts/Base.astro';
+import Atalhos from '../../../components/Atalhos.astro';
+import Mapa from '../../../components/Mapa.astro';
+import { render } from 'astro:content';
+import { IDIOMAS, PADRAO, t, rota, type Idioma } from '../../../i18n/ui';
+import { PAISES } from '../../../data/paises';
+import { noIdioma } from '../../../lib/conteudo';
+import { resumoPais } from '../../../lib/totais';
+
+export async function getStaticPaths() {
+  return IDIOMAS.flatMap((l) => PAISES.map((p) => ({ params: { lang: l === PADRAO ? undefined : l, slug: p.slug }, props: { lang: l, slug: p.slug } })));
+}
+const { lang, slug } = Astro.props as { lang: Idioma; slug: string };
+const i = PAISES.findIndex((p) => p.slug === slug);
+const pais = PAISES[i];
+const anterior = PAISES[(i - 1 + PAISES.length) % PAISES.length];
+const proxima = PAISES[(i + 1) % PAISES.length];
+const item = (await noIdioma('paises', lang)).find((x) => x.slug === slug);
+const dados = item?.entrada.data;
+const temTexto = !!item?.entrada.body?.trim();
+const { Content } = item && temTexto ? await render(item.entrada) : { Content: null };
+const n = resumoPais(slug);
+const maxCat = Math.max(1, ...n.porCategoria.map(([, v]) => v));
+
+const secoes = [
+  ['retrato', t(lang, 'pais.retrato'), !!dados?.retrato],
+  ['numeros', t(lang, 'pais.numeros'), true],
+  ['diario', t(lang, 'pais.diario'), !!Content || !!dados?.fotos.length],
+  ['falas', t(lang, 'pais.falas'), !!dados?.falas.length],
+  ['parceira', t(lang, 'pais.parceira'), !!dados?.universidade],
+].filter(([, , ok]) => ok) as [string, string, boolean][];
+---
+<Base lang={lang} titulo={pais.nome[lang]} descricao={dados?.resumo} caminho={`/paises/${slug}`}>
+  <article style={`--cor:${pais.cor}`}>
+    <header class="capa">
+      <div class="envelope capa-grade">
+        <div>
+        <a class="voltar" href={rota(lang, '/paises')}>← {t(lang, 'nav.paises')}</a>
+        <h1 transition:name={`pais-${slug}`}>{pais.nome[lang]}</h1>
+        {dados?.resumo && <p class="resumo">{dados.resumo}</p>}
+        {item && !item.traduzido && <p class="aviso">{t(lang, 'traducao.aviso')}</p>}
+        <nav class="sumario" aria-label="Nesta página">
+          {secoes.map(([id, nome]) => <a href={`#${id}`}>{nome}</a>)}
+        </nav>
+        </div>
+        <div class="mini-mapa"><div class="carimbo" aria-hidden="true"><span>{pais.nome[lang]}</span><small>Estudos Comparados</small></div><div transition:name="mapa"><Mapa lang={lang} destaque={slug} compacto /></div></div>
+      </div>
+    </header>
+
+    <div class="envelope corpo">
+      {dados?.retrato && (
+        <section id="retrato" class="bloco revelar"><h2>{t(lang, 'pais.retrato')}</h2><p class="grande">{dados.retrato}</p></section>
+      )}
+
+      <section id="numeros" class="bloco revelar">
+        <h2>{t(lang, 'pais.numeros')}</h2>
+        {dados?.coleta === 'em-andamento' && <p class="aviso">{t(lang, 'pais.coletaAndamento')}</p>}
+        {n.entrevistas > 0 ? (
+          <>
+            <p class="destaque"><strong>{n.entrevistas}</strong> {t(lang, 'num.entrevistas')} · <strong>{n.municipios}</strong> {t(lang, 'num.municipios')}</p>
+            <ul class="barras">
+              {n.porCategoria.map(([cat, v]) => <li><span>{cat}</span><span class="barra" style={`--p:${(v / maxCat) * 100}%`}></span><b>{v}</b></li>)}
+            </ul>
+          </>
+        ) : <p>{t(lang, 'pais.semNumeros')}</p>}
+      </section>
+
+      {(Content || (dados?.fotos.length ?? 0) > 0) && (
+        <section id="diario" class="bloco">
+          <h2>{t(lang, 'pais.diario')}</h2>
+          {dados?.fotos.length ? (
+            <div class="fotos">
+              {dados.fotos.map((f) => <figure><img src={f.src} alt={f.alt} loading="lazy" />{f.legenda && <figcaption>{f.legenda}</figcaption>}</figure>)}
+            </div>
+          ) : null}
+          {Content && <div class="texto"><Content /></div>}
+        </section>
+      )}
+
+      {dados?.falas.length ? (
+        <section id="falas" class="bloco">
+          <h2>{t(lang, 'pais.falas')}</h2>
+          {dados.falas.map((f) => <blockquote class="fala revelar">“{f.texto}”</blockquote>)}
+        </section>
+      ) : null}
+
+      {dados?.universidade && (
+        <section id="parceira" class="bloco revelar">
+          <h2>{t(lang, 'pais.parceira')}</h2>
+          <div class="parceira">
+            {dados.universidade.logo && <img src={dados.universidade.logo} alt="" width="120" />}
+            {dados.universidade.site ? <a href={dados.universidade.site}>{dados.universidade.nome}</a> : <p>{dados.universidade.nome}</p>}
+          </div>
+        </section>
+      )}
+    </div>
+
+    <nav class="envelope viagem" aria-label="Viagem pelos países">
+      <a href={rota(lang, `/paises/${anterior.slug}`)} style={`--cor:${anterior.cor}`}><small>{t(lang, 'pais.anterior')}</small>← {anterior.nome[lang]}</a>
+      <a href={rota(lang, `/paises/${proxima.slug}`)} style={`--cor:${proxima.cor}`} class="prox"><small>{t(lang, 'pais.proxima')}</small>{proxima.nome[lang]} →</a>
+    </nav>
+    <div class="envelope"><Atalhos lang={lang} atual={slug} /></div>
+  </article>
+</Base>
+
+<style>
+  .capa { background: linear-gradient(160deg, color-mix(in srgb, var(--cor) 22%, var(--papel)), var(--papel) 70%); padding-block: 32px 24px; position: relative; overflow: hidden; }
+    .capa-grade { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: center; }
+  .mini-mapa { max-width: 560px; justify-self: end; width: 100%; position: relative; }
+  @media (max-width: 900px) { .capa-grade { grid-template-columns: 1fr; } .mini-mapa { order: -1; } }
+  .voltar { font-weight: 700; text-decoration: none; }
+  .capa h1 { font-size: clamp(3rem, 11vw, 7.5rem); color: var(--tinta-forte); margin-top: 24px; }
+  .resumo { font-size: 1.25rem; max-width: 46ch; }
+  .aviso { background: #fff7e0; border-left: 4px solid var(--seta-amarela); padding: 10px 14px; border-radius: 8px; max-width: 60ch; }
+  .carimbo { position: absolute; left: -40px; bottom: -36px; z-index: 2; background: color-mix(in srgb, var(--papel) 80%, transparent); width: 150px; height: 150px; border: 4px double var(--cor); border-radius: 50%; display: grid; place-content: center; text-align: center; color: var(--cor); transform: rotate(-14deg); opacity: .85; font-family: var(--fonte-titulo); font-weight: 800; text-transform: uppercase; }
+  .carimbo small { font-size: .6rem; letter-spacing: .12em; }
+  @media (prefers-reduced-motion: no-preference) { .carimbo { animation: carimbar .6s cubic-bezier(.3,1.6,.5,1) both .2s; } }
+  @keyframes carimbar { from { transform: rotate(-30deg) scale(2.2); opacity: 0; } }
+  .sumario { position: sticky; top: 76px; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .sumario a { background: #fff; border-radius: 999px; padding: 6px 14px; text-decoration: none; font-weight: 700; font-size: .9rem; box-shadow: var(--sombra); }
+  .corpo { display: grid; gap: 8px; }
+  .bloco { padding-block: 40px; border-bottom: 1px dashed var(--linha); scroll-margin-top: 90px; }
+  .grande { font-size: 1.2rem; max-width: 65ch; }
+  .destaque { font-size: 1.2rem; }
+  .destaque strong { font-family: var(--fonte-titulo); font-size: 2.4rem; color: var(--cor); }
+  .barras { list-style: none; padding: 0; display: grid; gap: 10px; max-width: 720px; }
+  .barras li { display: grid; grid-template-columns: 200px 1fr 48px; align-items: center; gap: 12px; }
+  .barra { height: 14px; border-radius: 99px; background: linear-gradient(90deg, var(--cor) var(--p), var(--papel-2) var(--p)); }
+  .fotos { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; }
+  .fotos figure { flex: 0 0 min(80%, 420px); margin: 0; scroll-snap-align: start; background: #fff; padding: 10px 10px 14px; box-shadow: var(--sombra); transform: rotate(var(--r, -1deg)); }
+  .fotos figure:nth-child(even) { --r: 1.2deg; }
+  .fotos figcaption { font-size: .95rem; margin-top: 8px; }
+  .texto { max-width: 68ch; font-size: 1.1rem; }
+  .fala { font-family: var(--fonte-titulo); font-size: clamp(1.4rem, 3vw, 2rem); color: var(--tinta); border-left: 6px solid var(--cor); margin: 24px 0; padding: 4px 0 4px 24px; max-width: 40ch; }
+  .parceira { display: flex; gap: 18px; align-items: center; }
+  .viagem { display: flex; justify-content: space-between; gap: 16px; padding-block: 40px 0; }
+  .viagem a { flex: 1; text-decoration: none; font-family: var(--fonte-titulo); font-size: clamp(1.3rem, 3vw, 2rem); padding: 20px 24px; border-radius: var(--raio); background: color-mix(in srgb, var(--cor) 16%, #fff); }
+  .viagem small { display: block; font-family: var(--fonte-texto); font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--texto-suave); }
+  .viagem .prox { text-align: right; }
+  @media (max-width: 640px) { .carimbo { width: 96px; height: 96px; left: auto; right: 8px; bottom: -28px; font-size: .7rem; } .barras li { grid-template-columns: 1fr 40px; } .barras .barra { grid-column: 1 / -1; grid-row: 2; } }
+</style>

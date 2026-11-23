@@ -1,0 +1,13 @@
+---
+import Base from '../../layouts/Base.astro';
+import { caminhosIdiomas, t, type Idioma } from '../../i18n/ui';
+export const getStaticPaths = caminhosIdiomas;
+const { lang } = Astro.props as { lang: Idioma };
+---
+<Base lang={lang} titulo={t(lang, 'nav.contato')} caminho="/contato">
+  <section class="secao"><div class="envelope" style="max-width:760px">
+    <h1>{t(lang, 'nav.contato')}</h1>
+    <p>Laboratório ECoS · Universidade de Brasília</p>
+    <!-- E-mail institucional do projeto entra aqui (definir com a coordenação). -->
+  </div></section>
+</Base>

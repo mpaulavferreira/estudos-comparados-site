@@ -1,0 +1,25 @@
+{
+  "name": "estudos-comparados",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ambiente virtual do Estudos Comparados (ciência com afeto)",
+  "scripts": {
+    "dev": "astro dev",
+    "totais": "node scripts/buscar-totais.mjs",
+    "checar": "node scripts/checar-dados.mjs",
+    "build": "node scripts/buscar-totais.mjs && node scripts/checar-dados.mjs && astro build",
+    "preview": "astro preview",
+    "fotos": "node scripts/importar-fotos.mjs"
+  },
+  "dependencies": {
+    "astro": "7.4.13",
+    "d3-geo": "3.1.1",
+    "topojson-client": "3.1.0",
+    "world-atlas": "2.0.2"
+  },
+  "devDependencies": {
+    "heic-convert": "^2.1.0",
+    "sharp": "^0.34.5"
+  }
+}

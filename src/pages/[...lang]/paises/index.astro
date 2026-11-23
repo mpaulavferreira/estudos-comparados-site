@@ -1,0 +1,45 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Mapa from '../../../components/Mapa.astro';
+import { caminhosIdiomas, t, rota, type Idioma } from '../../../i18n/ui';
+import { PAISES } from '../../../data/paises';
+import { noIdioma } from '../../../lib/conteudo';
+import { resumoPais } from '../../../lib/totais';
+
+export const getStaticPaths = caminhosIdiomas;
+const { lang } = Astro.props as { lang: Idioma };
+const textos = await noIdioma('paises', lang);
+const regioes = [['america-latina', 'América Latina'], ['africa', 'África'], ['europa', 'Europa']] as const;
+---
+<Base lang={lang} titulo={t(lang, 'nav.paises')} caminho="/paises">
+  <section class="secao"><div class="envelope">
+    <h1>{t(lang, 'nav.paises')}</h1>
+    <div transition:name="mapa"><Mapa lang={lang} compacto /></div>
+    {regioes.map(([r, nome]) => (
+      <section class="regiao">
+        <h2>{nome}</h2>
+        <div class="grade">
+          {PAISES.filter((p) => p.regiao === r).map((p) => {
+            const txt = textos.find((x) => x.slug === p.slug)?.entrada.data;
+            const n = resumoPais(p.slug);
+            return (
+              <a class="cartao-pais revelar" href={rota(lang, `/paises/${p.slug}`)} style={`--cor:${p.cor}`}>
+                <h3 transition:name={`pais-${p.slug}`}>{p.nome[lang]}</h3>
+                {txt?.resumo && <p>{txt.resumo}</p>}
+                {n.entrevistas > 0 && <p class="mini">{n.entrevistas} {t(lang, 'num.entrevistas')}</p>}
+              </a>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </div></section>
+</Base>
+<style>
+  .regiao { margin-top: 48px; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+  .cartao-pais { display: block; text-decoration: none; color: inherit; background: #fff; border-radius: var(--raio); padding: 22px; box-shadow: var(--sombra); border-left: 8px solid var(--cor); transition: transform .2s; }
+  .cartao-pais:hover { transform: translateY(-4px) rotate(-.4deg); }
+  .cartao-pais h3 { margin: 0 0 6px; font-size: 1.5rem; }
+  .mini { font-size: .9rem; color: var(--texto-suave); margin: 0; }
+</style>

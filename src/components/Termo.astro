@@ -1,0 +1,12 @@
+---
+// Glossário de bolso: <Termo def="...">APS</Termo> mostra a explicação sem sair da página.
+interface Props { def: string }
+const { def } = Astro.props;
+const id = `termo-${Math.random().toString(36).slice(2, 8)}`;
+---
+<button type="button" class="termo" popovertarget={id}><slot /></button><span id={id} popover class="def">{def}</span>
+<style>
+  .termo { all: unset; cursor: help; border-bottom: 2px dotted var(--seta-verde-agua); color: inherit; }
+  .termo:focus-visible { outline: 3px solid var(--seta-vermelha); }
+  .def { border: 0; border-radius: 12px; padding: 12px 16px; max-width: 320px; background: var(--tinta-forte); color: #fff; box-shadow: var(--sombra); font-size: .95rem; }
+</style>

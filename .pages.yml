@@ -1,0 +1,299 @@
+# Painel de edição (Pages CMS: https://pagescms.org). Quem edita entra por convite, sem ver código.
+# Regras de dados também valem aqui: no máximo 3 falas por país, sem nome/cargo/unidade; fotos até 400 KB.
+media:
+  input: public/media
+  output: /media
+content:
+  - name: paises-pt
+    label: "Países (português)"
+    type: collection
+    path: src/content/paises/pt
+    format: yaml-frontmatter
+    filename: "{fields.pais}.md"
+    fields:
+      - { name: pais, label: País, type: select, required: true, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: resumo, label: "Frase de abertura (até 220 caracteres)", type: string, pattern: { regex: "^.{0,220}$", message: "Até 220 caracteres" } }
+      - { name: retrato, label: "Retrato rápido do país e do sistema de saúde", type: text }
+      - { name: coleta, label: Coleta, type: select, default: concluida, options: { values: [concluida, em-andamento] } }
+      - { name: nivelMapa, label: "No mapa, mostrar por", type: select, default: municipio, options: { values: [municipio, regiao] } }
+      - name: universidade
+        label: Universidade parceira
+        type: object
+        fields:
+          - { name: nome, label: Nome, type: string }
+          - { name: site, label: Site, type: string }
+          - { name: logo, label: Logo, type: image }
+      - name: falas
+        label: "Falas anônimas (máximo 3, sem nome, cargo ou unidade)"
+        type: object
+        list: { max: 3 }
+        fields:
+          - { name: texto, label: "Trecho curto (até 280 caracteres)", type: text, required: true }
+      - name: fotos
+        label: Fotos do diário de viagem
+        type: object
+        list: true
+        fields:
+          - { name: src, label: "Foto (até 400 KB)", type: image, required: true }
+          - { name: alt, label: "O que aparece na foto (para quem não enxerga)", type: string, required: true }
+          - { name: legenda, label: Legenda, type: string }
+          - { name: autorizada, label: "Tem pessoa identificável e há autorização de imagem", type: boolean }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: "Diário de viagem (relato curto em primeira pessoa)", type: rich-text }
+  - name: paises-es
+    label: "Países (espanhol)"
+    type: collection
+    path: src/content/paises/es
+    format: yaml-frontmatter
+    filename: "{fields.pais}.md"
+    fields:
+      - { name: pais, label: País, type: select, required: true, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: resumo, label: "Frase de abertura (até 220 caracteres)", type: string, pattern: { regex: "^.{0,220}$", message: "Até 220 caracteres" } }
+      - { name: retrato, label: "Retrato rápido do país e do sistema de saúde", type: text }
+      - { name: coleta, label: Coleta, type: select, default: concluida, options: { values: [concluida, em-andamento] } }
+      - { name: nivelMapa, label: "No mapa, mostrar por", type: select, default: municipio, options: { values: [municipio, regiao] } }
+      - name: universidade
+        label: Universidade parceira
+        type: object
+        fields:
+          - { name: nome, label: Nome, type: string }
+          - { name: site, label: Site, type: string }
+          - { name: logo, label: Logo, type: image }
+      - name: falas
+        label: "Falas anônimas (máximo 3, sem nome, cargo ou unidade)"
+        type: object
+        list: { max: 3 }
+        fields:
+          - { name: texto, label: "Trecho curto (até 280 caracteres)", type: text, required: true }
+      - name: fotos
+        label: Fotos do diário de viagem
+        type: object
+        list: true
+        fields:
+          - { name: src, label: "Foto (até 400 KB)", type: image, required: true }
+          - { name: alt, label: "O que aparece na foto (para quem não enxerga)", type: string, required: true }
+          - { name: legenda, label: Legenda, type: string }
+          - { name: autorizada, label: "Tem pessoa identificável e há autorização de imagem", type: boolean }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: "Diário de viagem (relato curto em primeira pessoa)", type: rich-text }
+  - name: paises-en
+    label: "Países (inglês)"
+    type: collection
+    path: src/content/paises/en
+    format: yaml-frontmatter
+    filename: "{fields.pais}.md"
+    fields:
+      - { name: pais, label: País, type: select, required: true, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: resumo, label: "Frase de abertura (até 220 caracteres)", type: string, pattern: { regex: "^.{0,220}$", message: "Até 220 caracteres" } }
+      - { name: retrato, label: "Retrato rápido do país e do sistema de saúde", type: text }
+      - { name: coleta, label: Coleta, type: select, default: concluida, options: { values: [concluida, em-andamento] } }
+      - { name: nivelMapa, label: "No mapa, mostrar por", type: select, default: municipio, options: { values: [municipio, regiao] } }
+      - name: universidade
+        label: Universidade parceira
+        type: object
+        fields:
+          - { name: nome, label: Nome, type: string }
+          - { name: site, label: Site, type: string }
+          - { name: logo, label: Logo, type: image }
+      - name: falas
+        label: "Falas anônimas (máximo 3, sem nome, cargo ou unidade)"
+        type: object
+        list: { max: 3 }
+        fields:
+          - { name: texto, label: "Trecho curto (até 280 caracteres)", type: text, required: true }
+      - name: fotos
+        label: Fotos do diário de viagem
+        type: object
+        list: true
+        fields:
+          - { name: src, label: "Foto (até 400 KB)", type: image, required: true }
+          - { name: alt, label: "O que aparece na foto (para quem não enxerga)", type: string, required: true }
+          - { name: legenda, label: Legenda, type: string }
+          - { name: autorizada, label: "Tem pessoa identificável e há autorização de imagem", type: boolean }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: "Diário de viagem (relato curto em primeira pessoa)", type: rich-text }
+  - name: paises-fr
+    label: "Países (francês)"
+    type: collection
+    path: src/content/paises/fr
+    format: yaml-frontmatter
+    filename: "{fields.pais}.md"
+    fields:
+      - { name: pais, label: País, type: select, required: true, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: resumo, label: "Frase de abertura (até 220 caracteres)", type: string, pattern: { regex: "^.{0,220}$", message: "Até 220 caracteres" } }
+      - { name: retrato, label: "Retrato rápido do país e do sistema de saúde", type: text }
+      - { name: coleta, label: Coleta, type: select, default: concluida, options: { values: [concluida, em-andamento] } }
+      - { name: nivelMapa, label: "No mapa, mostrar por", type: select, default: municipio, options: { values: [municipio, regiao] } }
+      - name: universidade
+        label: Universidade parceira
+        type: object
+        fields:
+          - { name: nome, label: Nome, type: string }
+          - { name: site, label: Site, type: string }
+          - { name: logo, label: Logo, type: image }
+      - name: falas
+        label: "Falas anônimas (máximo 3, sem nome, cargo ou unidade)"
+        type: object
+        list: { max: 3 }
+        fields:
+          - { name: texto, label: "Trecho curto (até 280 caracteres)", type: text, required: true }
+      - name: fotos
+        label: Fotos do diário de viagem
+        type: object
+        list: true
+        fields:
+          - { name: src, label: "Foto (até 400 KB)", type: image, required: true }
+          - { name: alt, label: "O que aparece na foto (para quem não enxerga)", type: string, required: true }
+          - { name: legenda, label: Legenda, type: string }
+          - { name: autorizada, label: "Tem pessoa identificável e há autorização de imagem", type: boolean }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: "Diário de viagem (relato curto em primeira pessoa)", type: rich-text }
+  - name: historias-pt
+    label: "Histórias da rede (português)"
+    type: collection
+    path: src/content/historias/pt
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: pais, label: País, type: select, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: autoria, label: Quem escreveu, type: string }
+      - { name: data, label: Data, type: date, required: true }
+      - name: capa
+        label: Foto de capa
+        type: object
+        fields:
+          - { name: src, label: Foto, type: image }
+          - { name: alt, label: O que aparece na foto, type: string }
+          - { name: legenda, label: Legenda, type: string }
+      - { name: video, label: "Link do vídeo (YouTube)", type: string }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: novidades-pt
+    label: "Novidades e agenda (português)"
+    type: collection
+    path: src/content/novidades/pt
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: data, label: Data, type: date, required: true }
+      - { name: tipo, label: Tipo, type: select, default: noticia, options: { values: [noticia, evento] } }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: historias-es
+    label: "Histórias da rede (espanhol)"
+    type: collection
+    path: src/content/historias/es
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: pais, label: País, type: select, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: autoria, label: Quem escreveu, type: string }
+      - { name: data, label: Data, type: date, required: true }
+      - name: capa
+        label: Foto de capa
+        type: object
+        fields:
+          - { name: src, label: Foto, type: image }
+          - { name: alt, label: O que aparece na foto, type: string }
+          - { name: legenda, label: Legenda, type: string }
+      - { name: video, label: "Link do vídeo (YouTube)", type: string }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: novidades-es
+    label: "Novidades e agenda (espanhol)"
+    type: collection
+    path: src/content/novidades/es
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: data, label: Data, type: date, required: true }
+      - { name: tipo, label: Tipo, type: select, default: noticia, options: { values: [noticia, evento] } }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: historias-en
+    label: "Histórias da rede (inglês)"
+    type: collection
+    path: src/content/historias/en
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: pais, label: País, type: select, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: autoria, label: Quem escreveu, type: string }
+      - { name: data, label: Data, type: date, required: true }
+      - name: capa
+        label: Foto de capa
+        type: object
+        fields:
+          - { name: src, label: Foto, type: image }
+          - { name: alt, label: O que aparece na foto, type: string }
+          - { name: legenda, label: Legenda, type: string }
+      - { name: video, label: "Link do vídeo (YouTube)", type: string }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: novidades-en
+    label: "Novidades e agenda (inglês)"
+    type: collection
+    path: src/content/novidades/en
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: data, label: Data, type: date, required: true }
+      - { name: tipo, label: Tipo, type: select, default: noticia, options: { values: [noticia, evento] } }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: historias-fr
+    label: "Histórias da rede (francês)"
+    type: collection
+    path: src/content/historias/fr
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: pais, label: País, type: select, options: { values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: autoria, label: Quem escreveu, type: string }
+      - { name: data, label: Data, type: date, required: true }
+      - name: capa
+        label: Foto de capa
+        type: object
+        fields:
+          - { name: src, label: Foto, type: image }
+          - { name: alt, label: O que aparece na foto, type: string }
+          - { name: legenda, label: Legenda, type: string }
+      - { name: video, label: "Link do vídeo (YouTube)", type: string }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: novidades-fr
+    label: "Novidades e agenda (francês)"
+    type: collection
+    path: src/content/novidades/fr
+    format: yaml-frontmatter
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: resumo, label: Resumo, type: string, required: true }
+      - { name: data, label: Data, type: date, required: true }
+      - { name: tipo, label: Tipo, type: select, default: noticia, options: { values: [noticia, evento] } }
+      - { name: rascunho, label: "Rascunho (não aparece no site)", type: boolean, default: true }
+      - { name: body, label: Texto, type: rich-text }
+  - name: biblioteca
+    label: Biblioteca
+    type: collection
+    path: src/content/biblioteca
+    format: yaml
+    filename: "{year}-{primary}.yml"
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: tipo, label: Tipo, type: select, required: true, options: { values: [artigo, tese, relatorio, atlas, cartilha, apresentacao, material-educativo, livro, video, outro] } }
+      - { name: paises, label: Países, type: select, options: { multiple: true, values: [angola, argentina, brasil, cabo-verde, chile, colombia, espanha, guine-bissau, mexico, mocambique, peru, portugal, sao-tome-e-principe] } }
+      - { name: idiomas, label: Idiomas, type: select, required: true, options: { multiple: true, values: [pt, es, en, fr] } }
+      - { name: fase, label: Fase, type: select, options: { values: [I, II, III, IV, V, VI] } }
+      - { name: ano, label: Ano, type: number, required: true }
+      - { name: autoria, label: Autoria, type: string }
+      - { name: resumo, label: Resumo, type: text }
+      - { name: arquivo, label: "PDF (até 10 MB)", type: file }
+      - { name: link, label: "Ou link externo (SciELO, OPAS, UnB, editora)", type: string }
