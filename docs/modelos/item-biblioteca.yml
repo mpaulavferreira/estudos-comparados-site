@@ -1,0 +1,10 @@
+# MODELO de item da Biblioteca (arquivos que começam com "_" não aparecem no site)
+titulo: "Título do material"
+tipo: artigo        # artigo, tese, relatorio, atlas, cartilha, apresentacao, material-educativo, livro, video, outro
+paises: [peru, mexico]
+idiomas: [pt, es]
+fase: V             # fases I a V (2014–2021) do site antigo; VI = etapa atual
+ano: 2021
+autoria: "Sobrenome, N.; Sobrenome, N."
+resumo: "Opcional."
+link: "https://www.scielo.br/..."   # ou arquivo: /media/biblioteca/arquivo.pdf (até 10 MB)

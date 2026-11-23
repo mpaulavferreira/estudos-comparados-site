@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro';
+import { caminhosIdiomas, t, type Idioma } from '../../i18n/ui';
+export const getStaticPaths = caminhosIdiomas;
+const { lang } = Astro.props as { lang: Idioma };
+---
+<Base lang={lang} titulo={t(lang, 'nav.quem')} caminho="/quem-somos">
+  <section class="secao"><div class="envelope" style="max-width:760px">
+    <h1>{t(lang, 'nav.quem')}</h1>
+    <p>Somos uma rede de pesquisadoras e pesquisadores coordenada pelo Laboratório ECoS da Universidade de Brasília, com universidades parceiras em 13 países.</p>
+    <p>{t(lang, 'rodape.financiadores')}.</p>
+    <!-- Equipe, coordenação e linha do tempo (2008 → 2027) entram aqui, migradas do site antigo. -->
+  </div></section>
+</Base>

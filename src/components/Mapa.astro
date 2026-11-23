@@ -1,0 +1,102 @@
+---
+// Mapa da rede: desenhado na hora do build (SVG puro, sem biblioteca no navegador).
+// Leve para conexões fracas; anima as rotas saindo de Brasília como as setas da logo.
+import { geoEqualEarth, geoPath, geoGraticule10 } from 'd3-geo';
+import { feature } from 'topojson-client';
+import mundo from 'world-atlas/countries-110m.json';
+import { PAISES, ORIGEM } from '../data/paises';
+import { resumoPais } from '../lib/totais';
+import { rota, t, type Idioma } from '../i18n/ui';
+
+interface Props { lang: Idioma; destaque?: string; compacto?: boolean }
+const { lang, destaque, compacto = false } = Astro.props;
+
+const W = 1000, H = compacto ? 520 : 620;
+// Recorte do "mundo atlântico": das Américas até Moçambique.
+const proj = geoEqualEarth().fitExtent([[10, 10], [W - 10, H - 10]], {
+  type: 'MultiPoint', coordinates: [[-114, 33], [44, -30], [-72, -55], [18, 47]],
+} as any);
+const caminho = geoPath(proj);
+const paises = (feature(mundo as any, (mundo as any).objects.countries) as any).features;
+const isoDaRede = new Map(PAISES.map((p) => [p.iso, p]));
+const [ox, oy] = proj(ORIGEM)!;
+
+const rotas = PAISES.filter((p) => p.slug !== 'brasil').map((p, i) => {
+  const [x, y] = proj(p.coord)!;
+  // curva: ponto de controle deslocado para fora, como as setas da logo
+  const mx = (ox + x) / 2, my = (oy + y) / 2;
+  const dx = x - ox, dy = y - oy;
+  const cx = mx - dy * 0.22, cy = my + dx * 0.22;
+  return { ...p, x, y, d: `M${ox.toFixed(1)},${oy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${x.toFixed(1)},${y.toFixed(1)}`, atraso: i * 0.12 };
+});
+const brasil = PAISES.find((p) => p.slug === 'brasil')!;
+const todos = [...rotas, { ...brasil, x: ox, y: oy, d: '', atraso: 0 }];
+---
+<figure class:list={['mapa', { compacto }]}>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="mapa-titulo">
+    <title id="mapa-titulo">{t(lang, 'home.escolha')}</title>
+    <defs>
+      <radialGradient id="mar" cx="45%" cy="50%" r="70%"><stop offset="0" stop-color="#eaf6fa" /><stop offset="1" stop-color="#cfe9f1" /></radialGradient>
+      <marker id="ponta" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke" /></marker>
+    </defs>
+    <rect width={W} height={H} fill="url(#mar)" rx="28" />
+    <path d={caminho(geoGraticule10())} fill="none" stroke="#fff" stroke-width="0.6" opacity="0.7" />
+    <g class="terras">
+      {paises.map((f: any) => {
+        const p = isoDaRede.get(f.id);
+        return p
+          ? <a href={rota(lang, `/paises/${p.slug}`)} class:list={['pais', { ativo: destaque === p.slug }]} style={`--cor:${p.cor}`} aria-label={p.nome[lang]}><path d={caminho(f)} /></a>
+          : <path d={caminho(f)} class="outro" />;
+      })}
+    </g>
+    <g class="rotas" aria-hidden="true">
+      {rotas.map((r) => <path class:list={{ ativo: destaque === r.slug }} d={r.d} style={`--cor:${r.cor}; --atraso:${r.atraso}s`} marker-end="url(#ponta)" pathLength="1" />)}
+    </g>
+    <g class="pinos">
+      {todos.map((p) => {
+        const r = resumoPais(p.slug);
+        const dica = r.entrevistas ? `${p.nome[lang]}: ${r.municipios} ${t(lang, 'num.municipios')}, ${r.entrevistas} ${t(lang, 'num.entrevistas')}` : p.nome[lang];
+        return (
+          <a href={rota(lang, `/paises/${p.slug}`)} class:list={['pino', { ativo: destaque === p.slug }]} style={`--cor:${p.cor}; --atraso:${p.atraso + 0.6}s`} aria-label={dica}>
+            <title>{dica}</title>
+            <circle cx={p.x} cy={p.y} r="16" class="alvo" />
+            <circle cx={p.x} cy={p.y} r="6" class="ponto" />
+            <circle cx={p.x} cy={p.y} r="6" class="onda" />
+            <text x={p.x} y={p.y - 14} text-anchor="middle">{p.nome[lang]}</text>
+          </a>
+        );
+      })}
+    </g>
+  </svg>
+</figure>
+
+<style>
+  .mapa { margin: 0; }
+  svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 20px 40px rgb(28 60 132 / .18)); }
+  .outro { fill: #fff; stroke: #d7ebf1; stroke-width: .6; }
+  .pais path { fill: color-mix(in srgb, var(--cor) 30%, #fff); stroke: #fff; stroke-width: .8; transition: fill .3s; }
+  .pais:hover path, .pais:focus path, .pais.ativo path { fill: var(--cor); }
+  .rotas path { fill: none; stroke: var(--cor); stroke-width: 3; stroke-linecap: round; opacity: .9; }
+  .pino { cursor: pointer; }
+  /* Na página de um país, a rota dele acende e as outras descansam */
+  svg:has(.ativo) .rotas path:not(.ativo) { opacity: .18; }
+  .rotas path.ativo { stroke-width: 5; }
+  .pino.ativo .ponto { r: 10; }
+  .pino.ativo text { opacity: 1; font-size: 18px; }
+  .pino .alvo { fill: transparent; }
+  .pino .ponto { fill: var(--cor); stroke: #fff; stroke-width: 2.5; }
+  .pino .onda { fill: none; stroke: var(--cor); stroke-width: 2; opacity: 0; }
+  .pino text { font: 700 13px var(--fonte-texto); fill: var(--tinta-forte); paint-order: stroke; stroke: #fff; stroke-width: 4px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .pino:hover text, .pino:focus text, .pino:focus-visible text { opacity: 1; }
+  .pino:hover .ponto { r: 9; }
+  @media (prefers-reduced-motion: no-preference) {
+    .rotas path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: tracar 1.4s cubic-bezier(.6,.1,.2,1) forwards; animation-delay: var(--atraso); }
+    .pino .ponto { transform-box: fill-box; transform-origin: center; transform: scale(0); animation: brotar .5s ease-out forwards; animation-delay: var(--atraso); }
+    .pino .onda { transform-box: fill-box; transform-origin: center; animation: onda 2.8s ease-out infinite; animation-delay: calc(var(--atraso) + 1s); }
+  }
+  @keyframes tracar { to { stroke-dashoffset: 0; } }
+  @keyframes brotar { to { transform: scale(1); } }
+  @keyframes onda { 0% { opacity: .7; transform: scale(1); } 100% { opacity: 0; transform: scale(3.2); } }
+  /* No celular, os nomes ficam na fileira de atalhos abaixo do mapa */
+  @media (max-width: 640px) { .pino text { display: none; } }
+</style>

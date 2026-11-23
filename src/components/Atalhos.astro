@@ -1,0 +1,16 @@
+---
+// Fileira de países: atalho para o mapa, essencial no celular (Cabo Verde e São Tomé são pequenos demais para o dedo).
+import { PAISES } from '../data/paises';
+import { rota, type Idioma } from '../i18n/ui';
+interface Props { lang: Idioma; atual?: string }
+const { lang, atual } = Astro.props;
+const ordem = [...PAISES].sort((a, b) => a.nome[lang].localeCompare(b.nome[lang], lang));
+---
+<ul class="atalhos">
+  {ordem.map((p) => <li><a class="pilula" href={rota(lang, `/paises/${p.slug}`)} style={`--cor:${p.cor}`} aria-current={atual === p.slug ? 'page' : undefined}><span class="ponto"></span>{p.nome[lang]}</a></li>)}
+</ul>
+<style>
+  .atalhos { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  [aria-current='page'] { background: var(--cor); color: #fff; border-color: var(--cor); }
+  @media (max-width: 640px) { .atalhos { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 8px; scroll-snap-type: x mandatory; } .atalhos li { scroll-snap-align: start; flex: none; } }
+</style>

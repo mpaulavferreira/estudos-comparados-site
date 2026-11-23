@@ -1,0 +1,34 @@
+---
+import { resumoGeral } from '../lib/totais';
+import { t, type Idioma } from '../i18n/ui';
+interface Props { lang: Idioma }
+const { lang } = Astro.props;
+const g = resumoGeral();
+const itens = [
+  { n: 13, k: 'num.paises' as const },
+  ...(g.municipios ? [{ n: g.municipios, k: 'num.municipios' as const }] : []),
+  ...(g.entrevistas ? [{ n: g.entrevistas, k: 'num.entrevistas' as const }] : []),
+];
+---
+<dl class="numeros">
+  {itens.map((i) => <div class="revelar"><dt>{t(lang, i.k)}</dt><dd data-contar={i.n}>{i.n.toLocaleString(lang)}</dd></div>)}
+</dl>
+<script>
+  // Conta de 0 até o número quando aparece na tela (só se o visitante aceita movimento).
+  document.addEventListener('astro:page-load', () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const obs = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return; obs.unobserve(e.target);
+      const el = e.target as HTMLElement, fim = Number(el.dataset.contar), ini = performance.now();
+      const passo = (agora: number) => { const p = Math.min(1, (agora - ini) / 1200); el.textContent = Math.round(fim * (1 - Math.pow(1 - p, 3))).toLocaleString(document.documentElement.lang); if (p < 1) requestAnimationFrame(passo); };
+      requestAnimationFrame(passo);
+    }), { threshold: .6 });
+    document.querySelectorAll('[data-contar]').forEach((el) => obs.observe(el));
+  });
+</script>
+<style>
+  .numeros { display: flex; flex-wrap: wrap; gap: clamp(24px, 6vw, 80px); justify-content: center; margin: 0; }
+  .numeros div { display: flex; flex-direction: column-reverse; align-items: center; text-align: center; }
+  dd { margin: 0; font-family: var(--fonte-titulo); font-size: clamp(3rem, 9vw, 6rem); color: var(--tinta); line-height: 1; font-weight: 800; }
+  dt { color: var(--texto-suave); font-weight: 700; max-width: 16ch; }
+</style>
